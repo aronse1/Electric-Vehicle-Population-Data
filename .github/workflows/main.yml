@@ -22,7 +22,7 @@ jobs:
         pip install pandas pyarrow
         
     - name: Run data processing script
-      run: python merge_parquet.py
+      run: python ./src/merge_parquet.py
         
     - name: Upload processed data
       uses: actions/upload-artifact@v4
