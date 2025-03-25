@@ -103,13 +103,6 @@ def process_data(df):
     # One-Hot-Encoding für kategorische Spalten
     df_processed = pd.get_dummies(df_processed, columns=categorical_cols, prefix=categorical_cols, dummy_na=True)
     
-    # Normalisierung numerischer Features
-    numeric_cols = ['distance_to_colony_km']
-    numeric_cols = [col for col in numeric_cols if col in df_processed.columns]
-    
-    if numeric_cols:
-        scaler = StandardScaler()
-        df_processed[numeric_cols] = scaler.fit_transform(df_processed[numeric_cols].fillna(0))
     
     print(f"Daten verarbeitet: {df_processed.shape[0]} Zeilen und {df_processed.shape[1]} Spalten")
     
