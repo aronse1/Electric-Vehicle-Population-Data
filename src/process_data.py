@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 import os
 import glob
 import pandas as pd
@@ -7,9 +7,9 @@ from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
 from geopy.distance import geodesic
 
-# Koordinaten der Copacabana-Kolonie
-COLONY_LATITUDE = -62.21  # 62.21S
-COLONY_LONGITUDE = -58.42  # 58.42W
+
+COLONY_LATITUDE = -62.21  
+COLONY_LONGITUDE = -58.42  
 
 def load_data(data_dir='./data/raw'):
     """Lädt alle CSV-Dateien aus dem Datenverzeichnis."""
@@ -18,7 +18,7 @@ def load_data(data_dir='./data/raw'):
     if not all_files:
         raise FileNotFoundError(f"Keine CSV-Dateien im Verzeichnis {data_dir} gefunden.")
     
-    # Alle CSV-Dateien laden und kombinieren
+    
     df_list = []
     for file in all_files:
         df = pd.read_csv(file)
@@ -31,19 +31,19 @@ def load_data(data_dir='./data/raw'):
 
 def process_data(df):
     """Führt alle Verarbeitungsschritte durch."""
-    # Kopie erstellen
+    
     df_processed = df.copy()
     
-    # 1. Datentypen konvertieren
-    # Datum im Format DD/MM/YYYY in Datetime konvertieren
+    
+    
     df_processed['DateGMT'] = pd.to_datetime(df_processed['DateGMT'], format='%d/%m/%Y', errors='coerce')
     
-    # Zeit hinzufügen
+    
     if 'TimeGMT' in df_processed.columns:
-        # Extrahieren von Stunden, Minuten und Sekunden
+        
         df_processed[['hour', 'minute', 'second']] = df_processed['TimeGMT'].str.split(':', expand=True).astype(float)
         
-        # Datetime mit Zeit kombinieren
+        
         df_processed['Timestamp'] = df_processed.apply(
             lambda row: pd.Timestamp(
                 year=row['DateGMT'].year,
@@ -56,41 +56,41 @@ def process_data(df):
             axis=1
         )
         
-        # Ursprüngliche Zeit-Spalten entfernen
+        
         df_processed = df_processed.drop(columns=['hour', 'minute', 'second'])
     
-    # Konvertiere Latitude und Longitude in numerische Werte
+    
     for col in ['Latitude', 'Longitude']:
         if col in df_processed.columns:
             df_processed[col] = pd.to_numeric(df_processed[col], errors='coerce')
     
-    # 2. Fehlende Werte behandeln
-    # Kategorische Spalten mit Mode imputieren
+    
+    
     categorical_cols = ['Sex', 'Age', 'Breed Stage', 'ArgosQuality']
     for col in categorical_cols:
         if col in df_processed.columns and df_processed[col].isna().any():
             df_processed[col] = df_processed[col].fillna(df_processed[col].mode()[0])
     
-    # KNN-Imputation für Latitude/Longitude
+    
     position_cols = ['Latitude', 'Longitude']
     if all(col in df_processed.columns for col in position_cols) and df_processed[position_cols].isna().any().any():
         imputer = KNNImputer(n_neighbors=5)
         df_processed[position_cols] = imputer.fit_transform(df_processed[position_cols])
     
-    # 3. Feature-Engineering
-    # Entfernung zur Kolonie
+    
+    
     df_processed['distance_to_colony_km'] = df_processed.apply(
         lambda row: geodesic((row['Latitude'], row['Longitude']), (COLONY_LATITUDE, COLONY_LONGITUDE)).kilometers
         if not pd.isna(row['Latitude']) and not pd.isna(row['Longitude']) else np.nan,
         axis=1
     )
     
-    # Zeitmerkmale
+    
     if 'Timestamp' in df_processed.columns:
         df_processed['hour_of_day'] = df_processed['Timestamp'].dt.hour
         df_processed['month'] = df_processed['Timestamp'].dt.month
         
-        # Jahreszeit (Südhalbkugel)
+        
         season_mapping = {
             12: 'Sommer', 1: 'Sommer', 2: 'Sommer',
             3: 'Herbst', 4: 'Herbst', 5: 'Herbst',
@@ -99,8 +99,8 @@ def process_data(df):
         }
         df_processed['season'] = df_processed['month'].map(season_mapping)
     
-    # 4. Datenformatierung
-    # One-Hot-Encoding für kategorische Spalten
+    
+    
     df_processed = pd.get_dummies(df_processed, columns=categorical_cols, prefix=categorical_cols, dummy_na=True)
     
     
@@ -110,15 +110,14 @@ def process_data(df):
 
 def save_data(df, output_path='./data/processed', filename='penguin_tracking_processed'):
     """Speichert die verarbeiteten Daten im Parquet-Format."""
-    # Sicherstellen, dass das Ausgabeverzeichnis existiert
+    
     os.makedirs(output_path, exist_ok=True)
     
-    # Speichern als Parquet
+    
     parquet_path = os.path.join(output_path, f"{filename}.parquet")
     df.to_parquet(parquet_path, index=False)
     print(f"Daten als Parquet gespeichert: {parquet_path}")
-    
-    # Zusätzlich als CSV speichern für einfachere Inspektion
+     
     csv_path = os.path.join(output_path, f"{filename}.csv")
     df.to_csv(csv_path, index=False)
     print(f"Daten als CSV gespeichert: {csv_path}")
@@ -127,16 +126,10 @@ def main():
     """Hauptfunktion für die Datenverarbeitung."""
     print("Starte Datenverarbeitung")
     
-    try:
-        # Daten laden
+    try:   
         df = load_data()
-        
-        # Daten verarbeiten
-        df_processed = process_data(df)
-        
-        # Daten speichern
-        save_data(df_processed)
-        
+        df_processed = process_data(df) 
+        save_data(df_processed)   
         print("Datenverarbeitung erfolgreich abgeschlossen")
         
     except Exception as e:
