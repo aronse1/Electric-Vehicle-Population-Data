@@ -1,9 +1,11 @@
 name: Data Processing Pipeline
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:  # Manuelle Auslösung
+
+permissions:
+  contents: write  # Diese Zeile hinzufügen für Schreibzugriff
 
 jobs:
   process_data:
@@ -33,3 +35,14 @@ jobs:
         git add data/processed/
         git commit -m "Update processed data" || echo "No changes to commit"
         git push
+        
+    # Hier den neuen Release-Schritt hinzufügen
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: success()
+      with:
+        files: data/processed/penguin_tracking_processed.parquet
+        name: Pinguin-Daten
+        tag_name: v${{ github.run_number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
