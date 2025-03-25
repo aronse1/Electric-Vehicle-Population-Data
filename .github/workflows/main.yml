@@ -25,7 +25,7 @@ jobs:
       run: python merge_parquet.py
         
     - name: Upload processed data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: processed-data
         path: data/processed/yellow_tripdata_2024_merged.parquet
