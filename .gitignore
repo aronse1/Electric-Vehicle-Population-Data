@@ -1,3 +1,4 @@
 data/processed/yellow_tripdata_2024_merged.parquet
 .ipynb_checkpoints
 data/student_depression_cleaned.parquet
+data/Electric_Vehicle_Population_Data_cleaned.parquet
