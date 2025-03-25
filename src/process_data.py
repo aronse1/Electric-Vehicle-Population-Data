@@ -11,7 +11,7 @@ from geopy.distance import geodesic
 COLONY_LATITUDE = -62.21  # 62.21S
 COLONY_LONGITUDE = -58.42  # 58.42W
 
-def load_data(data_dir='./data'):
+def load_data(data_dir='./data/raw'):
     """Lädt alle CSV-Dateien aus dem Datenverzeichnis."""
     all_files = glob.glob(os.path.join(data_dir, "*.csv"))
     
